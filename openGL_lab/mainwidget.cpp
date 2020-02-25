@@ -14,10 +14,10 @@ using namespace LabaGL;
 
 Sphere::Sphere(const QVector3D& position
                , const GLfloat radius
-               , const QVector3D& interval)
+               , const QVector3D& motionVector)
     : m_currentPosition{ position }
     , m_radius{ radius }
-    , m_interval{ interval }
+    , m_motionVector{ motionVector }
 {
     m_colors.push_back(QColor(Qt::green));
     m_colors.push_back(QColor(Qt::red));
@@ -31,7 +31,7 @@ Sphere::~Sphere()
 
 void Sphere::draw()
 {
-    m_currentPosition += m_interval;
+    m_currentPosition += m_motionVector;
 
     glTranslatef(m_currentPosition.x()
                  ,  m_currentPosition.y()
@@ -82,14 +82,18 @@ void Sphere::draw()
     glLoadIdentity();
 }
 
-QVector3D Sphere::drivingVector() const
+QVector3D Sphere::motionVector() const
 {
-    return  QVector3D{};
+    return  m_motionVector; //motionVector
 }
 
-void Sphere::setDrivingVector(const QVector3D &)
+void Sphere::setMotionVector(const QVector3D &value)
 {
-
+    if(value == m_motionVector)
+    {
+        return;
+    }
+    m_motionVector = value;
 }
 
 float Sphere::speed() const
@@ -104,7 +108,7 @@ void Sphere::setSpeed(const float)
 
 QVector3D Sphere::currentPosition() const
 {
-    return QVector3D{};
+    return m_currentPosition;
 }
 
 std::vector<QVector3D> Sphere::pointsCurrentPosition() const
@@ -132,6 +136,11 @@ void Sphere::setColors( const std::vector<QColor>& colors)
     }
 
     m_colors = colors;
+}
+
+GLfloat Sphere::radius() const
+{
+    return m_radius;
 }
 
 void Sphere::vertexCalculation()
@@ -197,12 +206,12 @@ void Plane::draw()
     glLoadIdentity();
 }
 
-QVector3D Plane::drivingVector() const
+QVector3D Plane::motionVector() const
 {
     return QVector3D{};
 }
 
-void Plane::setDrivingVector(const QVector3D &)
+void Plane::setMotionVector(const QVector3D &)
 {
 
 }
@@ -235,6 +244,8 @@ MainWidget::MainWidget(QWidget* parent)
     , m_yRotate{ 0 }
     , m_sphereLeft{ nullptr }
     , m_sphereRight{ nullptr }
+    , m_sphereSolidLeft{ nullptr }
+    , m_sphereSolidRight{ nullptr }
     , m_bottom{ nullptr }
 {
     initFigures();
@@ -297,6 +308,23 @@ void MainWidget::paintGL()
         glRotatef(m_xRotate, 1.0, 0.0, 0.0);
         glRotatef(m_yRotate, 0.0, 1.0, 0.0);
 
+        m_sphereSolidLeft->draw();
+    }
+
+    {
+        glTranslatef(0.0, 0.0, -3.0);
+        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
+        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
+
+        m_sphereSolidRight->draw();
+    }
+
+
+    {
+        glTranslatef(0.0, 0.0, -3.0);
+        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
+        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
+
         m_bottom->draw();
     }
 }
@@ -320,52 +348,82 @@ void MainWidget::mouseMoveEvent(QMouseEvent *e)
 
 void MainWidget::update()
 {
-    const bool isCollision = collision(m_sphereLeft.get(), m_sphereRight.get());
+    bool isCollision = collision(m_sphereLeft.get(), m_sphereRight.get());
 
-    if(isCollision)
+    std::vector<QColor> colors;
+
+    if( isCollision)
     {
-        std::vector<QColor> colors;
-
         colors.push_back(QColor(Qt::gray));
         colors.push_back(QColor(Qt::yellow));
 
-        m_sphereLeft->setColors(colors);
+        m_sphereLeft->setMotionVector(m_sphereLeft->motionVector() * -1);
+        m_sphereRight->setMotionVector(m_sphereRight->motionVector() * -1);
     }
+    else
+    {
+        colors.push_back(QColor(Qt::blue));
+        colors.push_back(QColor(Qt::darkGreen));
+    }
+
+    m_sphereLeft->setColors(colors);
+    m_sphereRight->setColors(colors);
+
+    if(collision(m_sphereLeft.get(), m_sphereSolidLeft.get()))
+    {
+        m_sphereLeft->setMotionVector(m_sphereLeft->motionVector() * -1);
+    }
+
+    if(collision(m_sphereRight.get(), m_sphereSolidRight.get()))
+    {
+        m_sphereRight->setMotionVector(m_sphereRight->motionVector() * -1);
+    }
+
 
     QOpenGLWidget::update();
 }
 
 void MainWidget::initFigures()
 {
-    m_sphereLeft = std::make_unique<Sphere>( QVector3D{ -1, 0, 0 }, 0.7f, QVector3D{0.01f, 0, 0} );
-    m_sphereRight = std::make_unique<Sphere>( QVector3D{ 1, 0, 0 }, 0.4f, QVector3D{-0.001f, 0, 0} );
+    //m_sphereLeft = std::make_unique<Sphere>( QVector3D{ -1, 0, 0 }, 0.7f, QVector3D{0.01f, 0, 0} );
+
+    m_sphereLeft.reset( new Sphere(QVector3D{ -1, 0, 0 }, 0.7f, QVector3D{0.01f, 0, 0}));
+
+    m_sphereRight = std::make_unique<Sphere>( QVector3D{ 1, 0, 0 }, 0.4f, QVector3D{-0.005f, 0, 0} );
+
+    m_sphereSolidLeft = std::make_unique<Sphere>( QVector3D{ -2.5, 0, 0 }, 0.5f, QVector3D{ 0.0, 0, 0 } );
+    m_sphereSolidRight = std::make_unique<Sphere>( QVector3D{ 2.5, 0, 0 }, 0.5f, QVector3D{ 0.0, 0, 0 } );
+
     m_bottom = std::make_unique<Plane>();
 }
 
 bool MainWidget::collision(const Figure* figure1, const Figure* figure2)
 {
-    //sqrt((x1-x2)^2+(y1-y2)^2+(z1-z2)^2)-R1-R2
-    const auto points1 = figure1->pointsCurrentPosition();
-    const auto points2 = figure2->pointsCurrentPosition();
 
-    const auto r1 = 0.7f;
-    const auto r2 = 0.4f;
-
-    for(const auto& point1 : points1)
+    switch (figure1->mode())
     {
-        for(const auto& point2 : points2)
+        case ModeFigure::modeSphere:
         {
-            auto d = sqrtf(
-                   (point1.x()-point2.x()) * (point1.x()-point2.x())
-                 + (point1.y()-point2.y()) * (point1.y()-point2.y())
-                 + (point1.z()-point2.z()) * (point1.z()-point2.z()))
-                 - r1-r2;
-            if( d <= 0)
-            {
-                //return true;
-            }
+        const auto r1 = figure1->radius();
+        const auto r2 = figure2->radius();
+
+        const auto point1 = figure1->currentPosition();
+        const auto point2 = figure2->currentPosition();
+
+        auto d = sqrtf(
+               (point1.x()-point2.x()) * (point1.x()-point2.x())
+             + (point1.y()-point2.y()) * (point1.y()-point2.y())
+             + (point1.z()-point2.z()) * (point1.z()-point2.z()))
+             - r1-r2;
+        if( d <= 0)
+        {
+            return true;
         }
+
+        return  false;
+    }
+    default:
+        return  false;
     }
 
-    return  false;
 }

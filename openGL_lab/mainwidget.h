@@ -11,6 +11,14 @@
 namespace LabaGL
 {
 
+enum ModeFigure
+{
+    modeSphere,
+    modeParallelepiped,
+    modePlace,
+    modePolyhedron
+};
+
 class Figure
 {
 public:
@@ -18,8 +26,8 @@ public:
 
     virtual void draw() = 0;
 
-    virtual QVector3D drivingVector() const = 0;
-    virtual void setDrivingVector(const QVector3D&) = 0;
+    virtual QVector3D motionVector() const = 0;
+    virtual void setMotionVector(const QVector3D&) = 0;
 
     virtual float speed() const = 0;
     virtual void setSpeed(const float) = 0;
@@ -29,6 +37,9 @@ public:
 
     virtual std::vector<QColor> colors() const { return std::vector<QColor>{}; }
     virtual void setColors( const std::vector<QColor>& ){}
+
+    virtual GLfloat radius() const { return 0.0f; }
+    virtual LabaGL::ModeFigure mode() const { return ModeFigure::modePolyhedron; }
 };
 
 class Sphere
@@ -37,15 +48,15 @@ class Sphere
 public:
     Sphere(const QVector3D& position
            , const GLfloat radius
-           , const QVector3D& interval = {0.0, 0.0, 0.0});
+           , const QVector3D& motionVector = {0.0, 0.0, 0.0});
 
     ~Sphere() override;
 
 public:
     virtual void draw() override;
 
-    virtual QVector3D drivingVector() const override;
-    virtual void setDrivingVector(const QVector3D&) override;
+    virtual QVector3D motionVector() const override;
+    virtual void setMotionVector(const QVector3D&) override;
 
     virtual float speed() const override;
     virtual void setSpeed(const float) override;
@@ -56,13 +67,17 @@ public:
     virtual std::vector<QColor> colors() const override;
     virtual void setColors( const std::vector<QColor>& ) override;
 
+    virtual GLfloat radius() const override;
+
+    virtual LabaGL::ModeFigure mode() const override { return ModeFigure::modeSphere; }
+
 private:
     void vertexCalculation();
 
 private:
     QVector3D m_currentPosition;
     GLfloat m_radius;
-    QVector3D m_interval;
+    QVector3D m_motionVector;
     std::vector<QVector3D> m_vertex;
 
     std::vector<QColor> m_colors;
@@ -79,8 +94,8 @@ public:
 public:
     virtual void draw() override;
 
-    virtual QVector3D drivingVector() const override;
-    virtual void setDrivingVector(const QVector3D&) override;
+    virtual QVector3D motionVector() const override;
+    virtual void setMotionVector(const QVector3D&) override;
 
     virtual float speed() const override;
     virtual void setSpeed(const float) override;
@@ -113,7 +128,7 @@ protected:
 
 private:
     void initFigures();
-    bool collision(const Figure* figure1, const Figure* figure2);
+    bool collision(const Figure*, const Figure*);
 
 private:
     GLuint m_nPyramid;
@@ -125,6 +140,9 @@ private:
 
     std::unique_ptr<Figure> m_sphereLeft;
     std::unique_ptr<Figure> m_sphereRight;
+    std::unique_ptr<Figure> m_sphereSolidLeft;
+    std::unique_ptr<Figure> m_sphereSolidRight;
+
     std::unique_ptr<Figure> m_bottom;
 
 };
