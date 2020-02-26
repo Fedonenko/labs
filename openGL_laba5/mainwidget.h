@@ -6,8 +6,11 @@
 #include <QVector3D>
 #include <QPoint>
 
+#include <GL/glu.h>
+
 namespace LabaGL
 {
+
 
 class MainWidget : public QOpenGLWidget
 {
@@ -27,6 +30,8 @@ private:
     QPoint m_ptPositione;
     GLfloat m_xRotate;
     GLfloat m_yRotate;
+
+    GLUquadricObj* m_qObj;
 
 };
 

@@ -23,7 +23,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-LIBS += -lopengl32
+LIBS += -lopengl32 -lglu32
 
 HEADERS += \
     mainwidget.h

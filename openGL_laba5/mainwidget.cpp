@@ -5,14 +5,13 @@
 #include <QtGui/QOpenGLFunctions>
 #include <QtGui/QOpenGLContext>
 
-#include <GL/gl.h>
-
 
 using namespace LabaGL;
 
 MainWidget::MainWidget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
+    m_qObj = gluNewQuadric();
 
 }
 
@@ -28,6 +27,32 @@ void MainWidget::initializeGL()
 
 void MainWidget::paintGL()
 {
+    //CExampleDoc* pDoc = GetDocument();
+	//ASSERT_VALID(pDoc);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glTranslatef(0.0, 0.0, -3.0);
+    glRotatef(m_xRotate, 1.0, 0.0, 0.0);
+    glRotatef(m_yRotate, 0.0, 1.0, 0.0);
+
+    GLuint n = glGenLists(1);
+    glNewList(n, GL_COMPILE_AND_EXECUTE);
+
+    glBegin(/*GL_LINE_STRIP);//*/GL_TRIANGLE_STRIP);
+
+
+	glColor3f(0.0f, 0.5f, 0.5f);
+	gluSphere(m_qObj, 1.0, 10, 10);
+
+    glEndList();
+
+    glCallList(n);
+
+	//SwapBuffers(pDC->m_hDC);
 
 }
 
