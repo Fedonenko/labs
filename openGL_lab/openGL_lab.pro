@@ -15,8 +15,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        cylinder.cpp \
         main.cpp \
-        mainwidget.cpp
+        mainwidget.cpp \
+        plane.cpp \
+        sphere.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -27,4 +30,8 @@ LIBS += -lopengl32
 
 
 HEADERS += \
-    mainwidget.h
+    cylinder.h \
+    figure.h \
+    mainwidget.h \
+    plane.h \
+    sphere.h
