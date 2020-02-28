@@ -35,6 +35,7 @@ protected:
 private:
     void initFigures();
     bool collision(const Figure*, const Figure*);
+    void globalRotate();
 
 private:
     GLuint m_nPyramid;

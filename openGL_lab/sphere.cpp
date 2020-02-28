@@ -160,7 +160,6 @@ void Sphere::vertexCalculation()
 
             m_vertex.push_back( {x, y, z} );
         }
-        glEnd();
     }
 }
 

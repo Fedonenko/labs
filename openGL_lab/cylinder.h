@@ -10,7 +10,7 @@ class Cylinder
         : public Figure
 {
 public:
-    Cylinder();
+    Cylinder(const GLfloat radius, const GLfloat height, const QVector3D& position = QVector3D{0,0,0});
 
     virtual void draw() override;
 
@@ -22,6 +22,16 @@ public:
 
     virtual QVector3D currentPosition() const override;
     virtual std::vector<QVector3D> pointsCurrentPosition() const override;
+
+private:
+    void vertexCalculation();
+
+private:
+    GLfloat m_radius;
+    GLfloat m_height;
+    QVector3D m_position;
+
+    std::vector<QVector3D> m_vertex;
 
 };
 

@@ -63,44 +63,33 @@ void MainWidget::paintGL()
     glLoadIdentity();   ///задаёт матрице проектирования единичную матрицу
 
     {
-        glTranslatef(0.0, 0.0, -3.0);
-        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
-        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
-
+        globalRotate();
         m_sphereLeft->draw();
     }
 
     {
-        glTranslatef(0.0, 0.0, -3.0);
-        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
-        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
-
+        globalRotate();
         m_sphereRight->draw();
     }
 
     {
-        glTranslatef(0.0, 0.0, -3.0);
-        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
-        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
-
+        globalRotate();
         m_sphereSolidLeft->draw();
     }
 
     {
-        glTranslatef(0.0, 0.0, -3.0);
-        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
-        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
-
+        globalRotate();
         m_sphereSolidRight->draw();
     }
 
+    {
+        globalRotate();
+        m_bottom->draw();
+    }
 
     {
-        glTranslatef(0.0, 0.0, -3.0);
-        glRotatef(m_xRotate, 1.0, 0.0, 0.0);
-        glRotatef(m_yRotate, 0.0, 1.0, 0.0);
-
-        m_bottom->draw();
+        globalRotate();
+        m_cylinder->draw();
     }
 }
 
@@ -168,7 +157,7 @@ void MainWidget::initFigures()
 
     m_bottom = std::make_unique<Plane>();
 
-    m_cylinder = std::make_unique<Cylinder>();
+    m_cylinder = std::make_unique<Cylinder>(0.4f, 0.5f, QVector3D{ -2.0, 0.0, -3 });
 }
 
 bool MainWidget::collision(const Figure* figure1, const Figure* figure2)
@@ -200,4 +189,11 @@ bool MainWidget::collision(const Figure* figure1, const Figure* figure2)
         return  false;
     }
 
+}
+
+void MainWidget::globalRotate()
+{
+    glTranslatef(0.0, 0.0, -3.0);
+    glRotatef(m_xRotate, 1.0, 0.0, 0.0);
+    glRotatef(m_yRotate, 0.0, 1.0, 0.0);
 }
