@@ -33,6 +33,7 @@ private:
 
     std::vector<QVector3D> m_vertex;
 
+    std::vector<QColor> m_colors;
 };
 
 }

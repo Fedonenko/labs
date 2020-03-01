@@ -10,12 +10,56 @@ Cylinder::Cylinder(const GLfloat radius, const GLfloat height, const QVector3D& 
     , m_height{ height }
     , m_position{ position }
 {
+    m_colors.push_back(QColor(Qt::green));
+    m_colors.push_back(QColor(Qt::magenta));
+
     vertexCalculation();
 }
 
 void Cylinder::draw()
 {
-    //for()
+    //m_position += m_motionVector;
+
+    glTranslatef(m_position.x()
+                 ,  m_position.y()
+                 , m_position.z());
+
+    glBegin(/*GL_LINE_STRIP);//*/GL_TRIANGLE_STRIP);
+
+    bool checkColor = false;
+
+    for(auto vertex : m_vertex)
+    {
+        if(checkColor)
+        {
+            if(m_colors.empty())
+            {
+                glColor3f(1.0, 1.0, 1.0);
+            }
+            else
+            {
+                glColor3f(static_cast<GLfloat>(m_colors.at(0).redF()),
+                          static_cast<GLfloat>(m_colors.at(0).greenF()),
+                          static_cast<GLfloat>(m_colors.at(0).blueF()));
+            }
+            checkColor = false;
+        }
+        else
+        {
+            if(m_colors.size() > 1)
+            {
+                glColor3f(static_cast<GLfloat>(m_colors.at(1).redF()),
+                          static_cast<GLfloat>(m_colors.at(1).greenF()),
+                          static_cast<GLfloat>(m_colors.at(1).blueF()));
+            }
+            checkColor = true;
+        }
+        glVertex3f(vertex.x(), vertex.y(), vertex.z());
+    }
+
+    glEnd();
+
+    glLoadIdentity();
 }
 
 QVector3D Cylinder::motionVector() const

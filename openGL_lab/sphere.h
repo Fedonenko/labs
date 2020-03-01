@@ -37,6 +37,7 @@ public:
 
 private:
     void vertexCalculation();
+    void initDrawFigure();
 
 private:
     QVector3D m_currentPosition;
@@ -45,6 +46,8 @@ private:
     std::vector<QVector3D> m_vertex;
 
     std::vector<QColor> m_colors;
+
+    GLuint m_nSphere;
 
 };
 

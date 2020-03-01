@@ -7,6 +7,9 @@
 #include <QTimer>
 
 #include <memory>
+#include <functional>
+#include <GL/glu.h>
+
 
 #include "figure.h"
 
@@ -33,7 +36,11 @@ protected:
     virtual void update();
 
 private:
+    virtual void wheelEvent(QWheelEvent *event);
+
+private:
     void initFigures();
+    void initOfDraw();
     bool collision(const Figure*, const Figure*);
     void globalRotate();
 
@@ -41,6 +48,8 @@ private:
     GLuint m_nPyramid;
     GLfloat m_xRotate;
     GLfloat m_yRotate;
+    int m_scroll;
+
     QPoint m_ptPositione;
 
     QTimer m_timer;
@@ -52,6 +61,10 @@ private:
     std::unique_ptr<Figure> m_cylinder;
 
     std::unique_ptr<Figure> m_bottom;
+
+    std::vector<std::function<void()>> m_listDraw;
+
+    GLUquadricObj* m_qObj;
 
 };
 

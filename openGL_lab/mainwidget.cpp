@@ -2,6 +2,8 @@
 
 #include <QOpenGLContext>
 #include <QtGui>
+#include <QWheelEvent>
+
 #include <GL/glaux.h>
 //#include <GLES3/gl3.h>
 #include <GL/gl.h>
@@ -35,13 +37,36 @@ MainWidget::MainWidget(QWidget* parent)
 
 void MainWidget::initializeGL()
 {
+    GLfloat light_col[] = {1,1,1};
+
     auto functions = QOpenGLContext::currentContext()->functions();
 
     functions->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     functions->glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_FLAT);
-    //m_nPyramid = createPyramid(1.2f);
+
+
+    //glLightfv(GL_LIGHT0, GL_DIFFUSE, light_col);
+
+    glPushMatrix();
+    glLoadIdentity();
+    //glTranslatef(1.0, 100.0, 1.0);
+    GLfloat light0_position[] = { 0.0, 0.0, 0.0, 1.0 };
+    glLightfv(GL_LIGHT1, GL_POSITION, light0_position);
+    glPopMatrix();
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_DIFFUSE);
+
+    initOfDraw();
+
+    m_qObj = gluNewQuadric();
+
 }
 
 void MainWidget::resizeGL(int w, int h)
@@ -62,35 +87,20 @@ void MainWidget::paintGL()
 
     glLoadIdentity();   ///задаёт матрице проектирования единичную матрицу
 
+    for(auto& draw : m_listDraw)
     {
         globalRotate();
-        m_sphereLeft->draw();
+        draw();
     }
 
-    {
-        globalRotate();
-        m_sphereRight->draw();
-    }
+    //glBegin(/*GL_LINE_STRIP);//*/GL_TRIANGLE_STRIP);
 
-    {
-        globalRotate();
-        m_sphereSolidLeft->draw();
-    }
+    //glTranslatef(0.0, 0.0, 3);
+    //glColor3f(0.0f, 0.5f, 0.5f);
+	//gluSphere(m_qObj, 1.0, 10, 10);
 
-    {
-        globalRotate();
-        m_sphereSolidRight->draw();
-    }
-
-    {
-        globalRotate();
-        m_bottom->draw();
-    }
-
-    {
-        globalRotate();
-        m_cylinder->draw();
-    }
+    //glEnd();
+    glLoadIdentity();
 }
 
 void MainWidget::mousePressEvent(QMouseEvent *e)
@@ -147,6 +157,15 @@ void MainWidget::update()
     QOpenGLWidget::update();
 }
 
+void MainWidget::wheelEvent(QWheelEvent *event)
+{
+    QPoint angelDelta;
+    if(event->delta())
+    {
+        angelDelta = event->angleDelta();
+    }
+}
+
 void MainWidget::initFigures()
 {
     m_sphereLeft = std::make_unique<Sphere>( QVector3D{ -1, 0, 0 }, 0.7f, QVector3D{0.01f, 0, 0} );
@@ -160,9 +179,19 @@ void MainWidget::initFigures()
     m_cylinder = std::make_unique<Cylinder>(0.4f, 0.5f, QVector3D{ -2.0, 0.0, -3 });
 }
 
+void MainWidget::initOfDraw()
+{
+    m_listDraw.push_back(std::bind( &Figure::draw, m_sphereLeft.get()));
+    m_listDraw.push_back(std::bind( &Figure::draw, m_sphereRight.get()));
+    m_listDraw.push_back(std::bind( &Figure::draw, m_sphereSolidLeft.get()));
+    m_listDraw.push_back(std::bind( &Figure::draw, m_sphereSolidRight.get()));
+    m_listDraw.push_back(std::bind( &Figure::draw, m_bottom.get()));
+    m_listDraw.push_back(std::bind( &Figure::draw, m_cylinder.get()));
+
+}
+
 bool MainWidget::collision(const Figure* figure1, const Figure* figure2)
 {
-
     switch (figure1->mode())
     {
         case ModeFigure::modeSphere:
@@ -178,12 +207,7 @@ bool MainWidget::collision(const Figure* figure1, const Figure* figure2)
              + (point1.y()-point2.y()) * (point1.y()-point2.y())
              + (point1.z()-point2.z()) * (point1.z()-point2.z()))
              - r1-r2;
-        if( d <= 0)
-        {
-            return true;
-        }
-
-        return  false;
+        return d <= 0;
     }
     default:
         return  false;

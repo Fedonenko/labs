@@ -32,9 +32,6 @@ void Sphere::draw()
                  ,  m_currentPosition.y()
                  , m_currentPosition.z());
 
-    GLuint n = glGenLists(1);
-    glNewList(n, GL_COMPILE_AND_EXECUTE);
-
     glBegin(/*GL_LINE_STRIP);//*/GL_TRIANGLE_STRIP);
 
     bool checkColor = false;
@@ -69,10 +66,6 @@ void Sphere::draw()
     }
 
     glEnd();
-
-    glEndList();
-
-    glCallList(n);
 
     glLoadIdentity();
 }
