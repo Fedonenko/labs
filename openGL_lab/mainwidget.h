@@ -48,9 +48,12 @@ private:
     GLuint m_nPyramid;
     GLfloat m_xRotate;
     GLfloat m_yRotate;
-    int m_scroll;
+    GLfloat m_xCentr;
+    GLfloat m_yCentr;
+    GLfloat m_scroll;
 
     QPoint m_ptPositione;
+    QPoint m_currentCentr;
 
     QTimer m_timer;
 

@@ -18,6 +18,9 @@ MainWidget::MainWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     , m_xRotate{ 0 }
     , m_yRotate{ 0 }
+    , m_xCentr{ 0.0 }
+    , m_yCentr{ 0.0 }
+    , m_scroll{ -3.0 }
     , m_sphereLeft{ nullptr }
     , m_sphereRight{ nullptr }
     , m_sphereSolidLeft{ nullptr }
@@ -27,12 +30,12 @@ MainWidget::MainWidget(QWidget* parent)
 {
     initFigures();
 
-    m_timer.setInterval(5);
-    connect(&m_timer, &QTimer::timeout, this, [this](){
-        update();
-    });
-
-    m_timer.start();
+    //m_timer.setInterval(5);
+    //connect(&m_timer, &QTimer::timeout, this, [this](){
+    //    update();
+    //});
+    //
+    //m_timer.start();
 }
 
 void MainWidget::initializeGL()
@@ -106,18 +109,30 @@ void MainWidget::paintGL()
 void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     m_ptPositione = e->pos();
+    m_currentCentr = m_ptPositione;
 }
 
 void MainWidget::mouseMoveEvent(QMouseEvent *e)
 {
+    const static float s_step = 0.05f;
+
     if( e->buttons() == Qt::LeftButton)
     {
         m_xRotate += 180 * static_cast<GLfloat>(e->y() - m_ptPositione.y()) / height();
         m_yRotate += 180 * static_cast<GLfloat>(e->x() - m_ptPositione.x()) / width();
-        update();
 
         m_ptPositione = e->pos();
     }
+
+    if( e->buttons() == Qt::RightButton)
+    {
+        m_xCentr +=  (e->x() - m_currentCentr.x()) * s_step;
+        m_yCentr +=  (m_currentCentr.y() - e->y()) * s_step;
+
+        m_currentCentr = e->pos();
+    }
+
+    update();
 }
 
 void MainWidget::update()
@@ -159,11 +174,14 @@ void MainWidget::update()
 
 void MainWidget::wheelEvent(QWheelEvent *event)
 {
-    QPoint angelDelta;
-    if(event->delta())
-    {
-        angelDelta = event->angleDelta();
-    }
+    const static float s_step = 0.5f;
+
+    QPoint angelDelta =  event->angleDelta();
+
+    angelDelta = event->angleDelta();
+    m_scroll += angelDelta.ry() / 60 * s_step;
+
+    update();
 }
 
 void MainWidget::initFigures()
@@ -217,7 +235,7 @@ bool MainWidget::collision(const Figure* figure1, const Figure* figure2)
 
 void MainWidget::globalRotate()
 {
-    glTranslatef(0.0, 0.0, -3.0);
+    glTranslatef(m_xCentr, m_yCentr, m_scroll);
     glRotatef(m_xRotate, 1.0, 0.0, 0.0);
     glRotatef(m_yRotate, 0.0, 1.0, 0.0);
 }
